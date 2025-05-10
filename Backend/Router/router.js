@@ -24,7 +24,7 @@ router.post("/addReferalBonus", async (req, res) => {
 
     console.log(`Amount received: ${amount}, Referrer address: ${address}`);
 
-    const bonus = amount * 0.25;
+    const bonus = amount * 0.1;
 
     const existingRecord = await model.findOne({ address });
 
