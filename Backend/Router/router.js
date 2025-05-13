@@ -1,6 +1,7 @@
 const express = require('express');
-const model = require("../model/model.js");  // (adjusted relative path if needed)
-const model2 = require("../model/model2.js");  // (adjusted relative path if needed)
+const model = require("../model/model.js"); 
+const model2 = require("../model/model2.js");  
+const model3 = require("../model/model3.js");  
 const router = express.Router();
 
 router.post("/addReferalBonus", async (req, res) => {
@@ -24,7 +25,7 @@ router.post("/addReferalBonus", async (req, res) => {
 
     console.log(`Amount received: ${amount}, Referrer address: ${address}`);
 
-    const bonus = amount * 0.1;
+    const bonus = amount * 0.25;
 
     const existingRecord = await model.findOne({ address });
 
@@ -116,5 +117,52 @@ router.post("/getData", async (req, res) => {
   }
 });
 
+router.post("/addSolToDatabase", async (req, res) => {
+  try {
+    const { amount } = req.body;
+    console.log(`Amount: ${amount}`);
+
+    if (amount == null) {
+      return res.status(400).json({ status: false, message: "Amount is required" });
+    }
+
+   
+    let existingRecord = await model3.findOne(); 
+
+    if (existingRecord) {
+      existingRecord.SolRecieved = (existingRecord.SolRecieved || 0) + amount;
+      await existingRecord.save();
+      return res.status(200).json({ status: true, message: "Amount updated successfully" });
+    } else {
+      const newRecord = new model3({
+        SolRecieved: amount,
+      });
+      await newRecord.save();
+      return res.status(201).json({ status: true, message: "Amount added successfully" });
+    }
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: "Server error" });
+  }
+});
+
+router.get("/getSolRecieved", async (req, res) => {
+  try {
+    const existingRecord = await model3.findOne();
+  
+    if (!existingRecord ) {
+      return res.status(200).json({ status: true, SolRecieved: 0 });
+    }
+    return res.status(200).json({
+      status: true,
+      SolRecieved: existingRecord.SolRecieved,
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: "Server error" });
+  }
+});
 
 module.exports = router;
